@@ -48,7 +48,12 @@ export async function POST(
     }
 
     // Update the notes field in the application
-    const currentNotes = application.notes as any[] || []
+    type Note = { id: string; content: string; createdAt: string; author: string };
+    const currentNotes: Note[] = application.notes
+      ? (typeof application.notes === 'string'
+          ? (JSON.parse(application.notes) as Note[])
+          : (application.notes as Note[]))
+      : [];
     const newNote = {
       id: Date.now().toString(),
       content: content.trim(),
