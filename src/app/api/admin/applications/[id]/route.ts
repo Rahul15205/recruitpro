@@ -26,7 +26,6 @@ export async function GET(
       )
     }
 
-    // Fetch application with related data
     const application = await prisma.application.findUnique({
       where: { id },
       include: {
@@ -73,7 +72,6 @@ export async function GET(
       )
     }
 
-    // Parse custom responses from answers
     let customResponses = null
     if (application.answers && application.job.customFields) {
       try {
@@ -91,7 +89,6 @@ export async function GET(
       }
     }
 
-    // Get notes from the application's notes field (JSON)
     let notes = []
     if (application.notes) {
       try {
@@ -109,7 +106,6 @@ export async function GET(
       }
     }
     
-    // Also add action logs as system notes
     const actionLogNotes = application.actionLogs.map(log => ({
       id: `log_${log.id}`,
       content: `Status changed to ${log.action.toLowerCase()}`,
@@ -117,12 +113,10 @@ export async function GET(
       author: 'System'
     }))
     
-    // Combine and sort notes by date (newest first)
     const allNotes = [...notes, ...actionLogNotes].sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
 
-    // Format the response to match the frontend interface
     const formattedApplication = {
       id: application.id,
       jobId: application.jobId,
@@ -135,7 +129,7 @@ export async function GET(
       appliedAt: application.createdAt.toISOString(),
       status: application.status.toLowerCase(),
       resume: application.resumeUrl,
-      resumePreviewUrl: application.resumePreviewUrl, // <-- Add this line
+      resumePreviewUrl: application.resumePreviewUrl,
       coverLetter: application.user.profileInfo?.coverLetter || null,
       experience: application.user.profileInfo?.experience || 'Not specified',
       previousRole: application.user.profileInfo?.previousRole || null,
