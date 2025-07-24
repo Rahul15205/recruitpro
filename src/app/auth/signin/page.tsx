@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { Suspense } from 'react';
 
 const signinSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -15,12 +16,11 @@ const signinSchema = z.object({
 
 type SigninForm = z.infer<typeof signinSchema>
 
-export default function SignIn() {
+function SignInInner() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
-  
   const message = searchParams.get('message')
 
   const {
@@ -34,14 +34,12 @@ export default function SignIn() {
   const onSubmit = async (data: SigninForm) => {
     setIsLoading(true)
     setError('')
-
     try {
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
         redirect: false,
       })
-
       if (result?.error) {
         setError('Invalid email or password')
       } else {
@@ -77,20 +75,17 @@ export default function SignIn() {
               </Link>
             </p>
           </div>
-          
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {message && (
               <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
                 {message}
               </div>
             )}
-
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
                 {error}
               </div>
             )}
-
             <div className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -106,7 +101,6 @@ export default function SignIn() {
                   <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                 )}
               </div>
-
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password
@@ -122,7 +116,6 @@ export default function SignIn() {
                 )}
               </div>
             </div>
-
             <div>
               <button
                 type="submit"
@@ -135,5 +128,13 @@ export default function SignIn() {
           </form>
         </div>
       </div>
+  )
+}
+
+export default function SignIn() {
+  return (
+    <Suspense>
+      <SignInInner />
+    </Suspense>
   )
 }

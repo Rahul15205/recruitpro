@@ -92,7 +92,9 @@ export async function GET(
     let notes: Note[] = []
     if (application.notes) {
       try {
-        const applicationNotes = application.notes as Note[]
+        const applicationNotes: Note[] = typeof application.notes === 'string'
+          ? (JSON.parse(application.notes))
+          : (application.notes as Note[]);
         if (Array.isArray(applicationNotes)) {
           notes = applicationNotes.map(note => ({
             id: note.id,
@@ -118,6 +120,35 @@ export async function GET(
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
 
+    // Safely parse profileInfo if it's a string
+    type ProfileInfo = {
+      phone?: string;
+      location?: string;
+      coverLetter?: string;
+      experience?: string;
+      previousRole?: string;
+      currentCompany?: string;
+      expectedSalary?: string;
+      availabilityDate?: string;
+    };
+    function isPlainObject(obj: unknown): obj is ProfileInfo {
+      return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+    }
+    let profileInfo: ProfileInfo | null = null;
+    if (application.user.profileInfo) {
+      if (typeof application.user.profileInfo === 'string') {
+        try {
+          profileInfo = JSON.parse(application.user.profileInfo);
+        } catch {
+          profileInfo = null;
+        }
+      } else if (isPlainObject(application.user.profileInfo)) {
+        profileInfo = application.user.profileInfo;
+      } else {
+        profileInfo = null;
+      }
+    }
+
     const formattedApplication = {
       id: application.id,
       jobId: application.jobId,
@@ -125,18 +156,18 @@ export async function GET(
       jobDepartment: application.job.department,
       candidateName: application.user.name || 'Unknown',
       candidateEmail: application.user.email,
-      candidatePhone: application.user.profileInfo?.phone || null,
-      candidateLocation: application.user.profileInfo?.location || application.job.location || 'Not specified',
+      candidatePhone: profileInfo?.phone || null,
+      candidateLocation: profileInfo?.location || application.job.location || 'Not specified',
       appliedAt: application.createdAt.toISOString(),
       status: application.status.toLowerCase(),
       resume: application.resumeUrl,
       resumePreviewUrl: application.resumePreviewUrl,
-      coverLetter: application.user.profileInfo?.coverLetter || null,
-      experience: application.user.profileInfo?.experience || 'Not specified',
-      previousRole: application.user.profileInfo?.previousRole || null,
-      currentCompany: application.user.profileInfo?.currentCompany || null,
-      expectedSalary: application.user.profileInfo?.expectedSalary || null,
-      availabilityDate: application.user.profileInfo?.availabilityDate || null,
+      coverLetter: profileInfo?.coverLetter || null,
+      experience: profileInfo?.experience || 'Not specified',
+      previousRole: profileInfo?.previousRole || null,
+      currentCompany: profileInfo?.currentCompany || null,
+      expectedSalary: profileInfo?.expectedSalary || null,
+      availabilityDate: profileInfo?.availabilityDate || null,
       customResponses: customResponses,
       notes: allNotes
     }

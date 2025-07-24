@@ -67,7 +67,7 @@ export async function POST(
     await prisma.application.update({
       where: { id },
       data: {
-        notes: updatedNotes
+        notes: JSON.stringify(updatedNotes),
       }
     })
 
@@ -124,7 +124,12 @@ export async function GET(
       )
     }
 
-    const notes = application.notes as any[] || []
+    type Note = { id: string; content: string; createdAt: string; author: string };
+    const notes: Note[] = application.notes
+      ? (typeof application.notes === 'string'
+          ? (JSON.parse(application.notes) as Note[])
+          : (application.notes as Note[]))
+      : [];
 
     return NextResponse.json({
       notes: notes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())

@@ -70,21 +70,51 @@ export async function GET(request: NextRequest) {
       take: limit
     })
 
+    // Safely parse profileInfo if it's a string
+    type ProfileInfo = {
+      phone?: string;
+      location?: string;
+      coverLetter?: string;
+      experience?: string;
+      previousRole?: string;
+      currentCompany?: string;
+      expectedSalary?: string;
+      availabilityDate?: string;
+    };
+    function isPlainObject(obj: unknown): obj is ProfileInfo {
+      return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+    }
     // Format the response to match the frontend interface
-    const formattedApplications = applications.map((app: typeof applications[number]) => ({
-      id: app.id,
-      jobId: app.jobId,
-      jobTitle: app.job.title,
-      candidateName: app.user.name || 'Unknown',
-      candidateEmail: app.user.email,
-      appliedAt: app.createdAt.toISOString(),
-      status: app.status.toLowerCase(),
-      resume: app.resumeUrl,
-      coverLetter: null, // Not implemented yet
-      experience: app.user.profileInfo?.experience || 'Not specified',
-      location: app.user.profileInfo?.location || app.job.location || 'Not specified',
-      notes: app.notes
-    }))
+    const formattedApplications = applications.map((app: typeof applications[number]) => {
+      let profileInfo: ProfileInfo | null = null;
+      if (app.user.profileInfo) {
+        if (typeof app.user.profileInfo === 'string') {
+          try {
+            profileInfo = JSON.parse(app.user.profileInfo);
+          } catch {
+            profileInfo = null;
+          }
+        } else if (isPlainObject(app.user.profileInfo)) {
+          profileInfo = app.user.profileInfo;
+        } else {
+          profileInfo = null;
+        }
+      }
+      return {
+        id: app.id,
+        jobId: app.jobId,
+        jobTitle: app.job.title,
+        candidateName: app.user.name || 'Unknown',
+        candidateEmail: app.user.email,
+        appliedAt: app.createdAt.toISOString(),
+        status: app.status.toLowerCase(),
+        resume: app.resumeUrl,
+        coverLetter: profileInfo?.coverLetter || null,
+        experience: profileInfo?.experience || 'Not specified',
+        location: profileInfo?.location || app.job.location || 'Not specified',
+        notes: app.notes
+      }
+    })
 
     return NextResponse.json({
       applications: formattedApplications,
