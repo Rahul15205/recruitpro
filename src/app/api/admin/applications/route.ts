@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-
+import type { Prisma } from '@prisma/client';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -22,8 +22,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10')
 
     // Build where clause for filtering
-    const where: any = {}
-    
+    const where: Record<string, unknown> = {};    
     if (status && status !== 'all') {
       where.status = status.toUpperCase()
     }
@@ -72,7 +71,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Format the response to match the frontend interface
-    const formattedApplications = applications.map(app => ({
+    const formattedApplications = applications.map((app: typeof applications[number]) => ({
       id: app.id,
       jobId: app.jobId,
       jobTitle: app.job.title,

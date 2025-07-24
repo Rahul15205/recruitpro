@@ -72,16 +72,15 @@ export async function GET(
       )
     }
 
-    let customResponses = null
+    let customResponses: { question: string; answer: string }[] | null = null
     if (application.answers && application.job.customFields) {
       try {
-        const answers = application.answers as any
-        const customFields = application.job.customFields as any
-        
+        const answers = application.answers as Record<string, string>
+        const customFields = application.job.customFields as Array<{ id: string; name?: string; question?: string; label?: string }>
         if (Array.isArray(customFields) && typeof answers === 'object') {
-          customResponses = customFields.map((field: any) => ({
-            question: field.question || field.label,
-            answer: answers[field.id] || answers[field.name] || 'No answer provided'
+          customResponses = customFields.map((field) => ({
+            question: field.question || field.label || '',
+            answer: answers[field.id] || (field.name ? answers[field.name] : '') || 'No answer provided'
           }))
         }
       } catch (error) {
@@ -89,10 +88,11 @@ export async function GET(
       }
     }
 
-    let notes = []
+    type Note = { id: string; content: string; createdAt: string; author: string }
+    let notes: Note[] = []
     if (application.notes) {
       try {
-        const applicationNotes = application.notes as any[]
+        const applicationNotes = application.notes as Note[]
         if (Array.isArray(applicationNotes)) {
           notes = applicationNotes.map(note => ({
             id: note.id,
@@ -106,14 +106,15 @@ export async function GET(
       }
     }
     
-    const actionLogNotes = application.actionLogs.map(log => ({
+    type ActionLog = { id: string; action: string; timestamp: Date }
+    const actionLogNotes: Note[] = application.actionLogs.map((log: ActionLog) => ({
       id: `log_${log.id}`,
-      content: `Status changed to ${log.action.toLowerCase()}`,
+      content: `Status changed to ${String(log.action).toLowerCase()}`,
       createdAt: log.timestamp.toISOString(),
       author: 'System'
     }))
     
-    const allNotes = [...notes, ...actionLogNotes].sort((a, b) => 
+    const allNotes: Note[] = [...notes, ...actionLogNotes].sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
 

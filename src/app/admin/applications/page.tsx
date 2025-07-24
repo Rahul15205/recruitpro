@@ -90,7 +90,7 @@ export default function AdminApplicationsPage() {
       const jobsData = await jobsResponse.json();
       
       // Format jobs data to match the interface
-      const formattedJobs: Job[] = jobsData.map((job: any) => ({
+      const formattedJobs: Job[] = jobsData.map((job: { id: string; title: string; department: string; _count: { applications: number } }) => ({
         id: job.id,
         title: job.title,
         department: job.department,

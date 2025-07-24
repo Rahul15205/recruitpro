@@ -270,7 +270,7 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h3 className="text-lg font-medium text-gray-900">Application not found</h3>
-          <p className="mt-2 text-gray-600">The application you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-8">The job you&apos;re looking for doesn&apos;t exist or has been removed.</p>
           <button
             onClick={() => router.push('/admin/applications')}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

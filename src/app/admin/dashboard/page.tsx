@@ -13,10 +13,19 @@ interface DashboardStats {
   pendingApplications: number
 }
 
+type RecentJob = {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  status: string;
+  _count?: { applications: number };
+};
+
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [recentJobs, setRecentJobs] = useState<any[]>([])
+  const [recentJobs, setRecentJobs] = useState<RecentJob[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

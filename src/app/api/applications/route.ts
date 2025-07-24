@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
           );
           stream.end(buffer); // Cloudinary will extract the first page as an image
         });
-        // @ts-expect-error
+        // @ts-expect-error - Cloudinary result type
         resumePreviewUrl = previewResult.secure_url;
       } catch (err) {
         console.error('Cloudinary upload error:', err);

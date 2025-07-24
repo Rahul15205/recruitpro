@@ -159,7 +159,7 @@ export default function CreateJob() {
                 </label>
                 <p className="text-sm text-gray-500 mb-3">
                   Add custom questions for applicants. Leave empty if not needed.
-                  Example: [["Why are you interested in this role?"], ["What's your expected start date?"]]
+                  Example: [[&quot;Why are you interested in this role?&quot;], [&quot;What&apos;s your expected start date?&quot;]]
                 </p>
                 <textarea
                   {...register('customFields')}
